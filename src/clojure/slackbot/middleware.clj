@@ -117,18 +117,23 @@
   "Pull the Slack Team ID from the request and fetch relevant team details
   for this request."
   [handler]
-  (fn [{{:keys [team_id]} :body-params tx :slackbot.database/tx :as req}]
+  (fn [{{:keys [team_id type]} :body-params tx :slackbot.database/tx :as req}]
     (if-let [{:keys [oauth_access_token app_user_id]}
              (db.teams/workspace-details tx {:workspace_id team_id})]
       (-> req
           (assoc :slackbot.slack/oauth-access-token oauth_access_token)
           (assoc :slackbot.slack/app-user-id app_user_id)
           (handler))
-      (do
-        (timbre/warn {:message "Received request from unregistered team"
-                      :team-id team_id})
-        (-> {:message "Invalid team" :team-id team_id}
-            (response/bad-request))))))
+      (if (= "url_verification" type)
+        (do
+          (timbre/info {:message "Received URL verification request, passing through without team or app user ID"
+                        :type    type})
+          (handler req))
+        (do
+          (timbre/warn {:message "Received request from unregistered team"
+                        :team-id team_id})
+          (-> {:message "Invalid team" :team-id team_id}
+              (response/bad-request)))))))
 
 (defn wrap-verify-slack-token
   "Check for a Slack Verification token in the request body and reject the

@@ -1,0 +1,17 @@
+version: '2.1'
+
+services:
+  slackbot-dev:
+    container_name: slackbot-dev
+    build: .
+    environment:
+      - SLACKBOT__DATABASE__CONNECTION_STRING="jdbc:sqlite:slackbot.db"
+      - SLACKBOT__SLACK__CLIENT_ID=${SLACKBOT__SLACK__CLIENT_ID}
+      - SLACKBOT__SLACK__CLIENT_SECRET=${SLACKBOT__SLACK__CLIENT_SECRET}
+      - SLACKBOT__SLACK__REDIRECT_URL=${SLACKBOT__SLACK__REDIRECT_URL}
+      - SLACKBOT__SLACK__VERIFICATION_TOKEN=${SLACKBOT__SLACK__VERIFICATION_TOKEN}
+    ports:
+      - "8080:8080"
+    volumes:
+      - ${HOME}/.m2:/root/.m2
+      - ./slackbot.db:/usr/src/app/slackbot.db

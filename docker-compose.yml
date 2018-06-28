@@ -1,0 +1,29 @@
+version: '2.1'
+
+services:
+  slackbot:
+    container_name: slackbot
+    build: .
+    environment:
+      - SLACKBOT__DATABASE__CONNECTION_STRING="jdbc:sqlite:slackbot.db"
+      - SLACKBOT__SLACK__CLIENT_ID=${SLACKBOT__SLACK__CLIENT_ID}
+      - SLACKBOT__SLACK__CLIENT_SECRET=${SLACKBOT__SLACK__CLIENT_SECRET}
+      - SLACKBOT__SLACK__REDIRECT_URL=${SLACKBOT__SLACK__REDIRECT_URL}
+      - SLACKBOT__SLACK__VERIFICATION_TOKEN=${SLACKBOT__SLACK__VERIFICATION_TOKEN}
+      - TIMBRE_LEVEL=:info
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./slackbot.db:/usr/src/app/slackbot.db
+
+    nginx:
+      image: nginx:1.15.0-alpine
+      ports:
+        - "80:80"
+        - "443:443"
+      volumes:
+      - ./cert.pem:/etc/nginx/ssl/cert.pem
+      - ./ssl.key:/etc/nginx/ssl/ssl.key
+      - ./dhparam.pem:/etc/nginx/ssl/dhparam.pem
+      - ./etc/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf
+      - ./.well-known/:/app/.well-known/

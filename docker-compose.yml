@@ -16,6 +16,20 @@ services:
     volumes:
       - ./slackbot.db:/usr/src/app/slackbot.db
 
+  migrate:
+    container_name: slackbot-migrate
+    build: .
+    environment:
+      - SLACKBOT__DATABASE__CONNECTION_STRING="jdbc:sqlite:slackbot.db"
+      - SLACKBOT__SLACK__CLIENT_ID=${SLACKBOT__SLACK__CLIENT_ID}
+      - SLACKBOT__SLACK__CLIENT_SECRET=${SLACKBOT__SLACK__CLIENT_SECRET}
+      - SLACKBOT__SLACK__REDIRECT_URL=${SLACKBOT__SLACK__REDIRECT_URL}
+      - SLACKBOT__SLACK__VERIFICATION_TOKEN=${SLACKBOT__SLACK__VERIFICATION_TOKEN}
+      - TIMBRE_LEVEL=:info
+    command: ["migrate"]
+    volumes:
+      - ./slackbot.db:/usr/src/app/slackbot.db
+
   nginx:
     container_name: nginx
     image: nginx:1.15.0-alpine

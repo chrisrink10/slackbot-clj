@@ -17,10 +17,13 @@ services:
       - ./slackbot.db:/usr/src/app/slackbot.db
 
   nginx:
+    container_name: nginx
     image: nginx:1.15.0-alpine
     ports:
       - "80:80"
       - "443:443"
+    depends_on:
+      - slackbot
     volumes:
       - ./cert.pem:/etc/nginx/ssl/cert.pem
       - ./ssl.key:/etc/nginx/ssl/ssl.key

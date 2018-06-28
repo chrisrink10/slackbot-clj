@@ -1,4 +1,4 @@
-version: '2.1'
+version: '2'
 
 services:
   slackbot:
@@ -16,12 +16,12 @@ services:
     volumes:
       - ./slackbot.db:/usr/src/app/slackbot.db
 
-    nginx:
-      image: nginx:1.15.0-alpine
-      ports:
-        - "80:80"
-        - "443:443"
-      volumes:
+  nginx:
+    image: nginx:1.15.0-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
       - ./cert.pem:/etc/nginx/ssl/cert.pem
       - ./ssl.key:/etc/nginx/ssl/ssl.key
       - ./dhparam.pem:/etc/nginx/ssl/dhparam.pem

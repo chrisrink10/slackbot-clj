@@ -34,12 +34,11 @@ AND channel_id = :channel_id
 
 -- :name check-stinky-pinky-guess :? :1
 -- :doc Get the Stinky Pinky channels for the workspace.
-SELECT 1 AS guess
+SELECT host = :user_id AS is_guesser_host, 1 AS is_guess_correct
 FROM stinkypinky
 WHERE workspace_id = :workspace_id
 AND channel_id = :channel_id
 AND solution = :guess
-AND host != :user_id
 
 -- :name set-stinky-pinky-details :! :n
 -- :doc Set the details for this Stinky Pink round.

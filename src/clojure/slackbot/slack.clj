@@ -97,4 +97,29 @@
                                  :error       (:body response)
                                  :channel     channel
                                  :text        text
+                                 :attachments attachments}))))))
+
+(defn send-ephemeral
+  "Send an ephemeral Slack message.
+
+  Callers need to supply the OAuth access token for the workspace they
+  are sending messages to."
+  [token {:keys [channel text user attachments]}]
+  (-> (post-slack token
+                  "https://slack.com/api/chat.postEphemeral"
+                  (assoc-some {:channel channel
+                               :text    text
+                               :user    user}
+                              :attachments attachments))
+      (p/then (fn [{{:keys [ok]} :body :as response}]
+                (cond
+                  (and (s/success? response) (true? ok))
+                  (timbre/debug {:message  "Received postEphemeral response from Slack"
+                                 :response response})
+
+                  :else
+                  (timbre/error {:message     "Could not post response message"
+                                 :error       (:body response)
+                                 :channel     channel
+                                 :text        text
                                  :attachments attachments})))) ))

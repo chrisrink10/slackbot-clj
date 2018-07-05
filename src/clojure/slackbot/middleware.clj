@@ -149,6 +149,18 @@
               (response/bad-request)))
         (handler req)))))
 
+(defn wrap-ignore-myself
+  "Ignore Slack Events from the app."
+  [handler]
+  (fn [{{{:keys [user]} :event} :body-params
+        app-user-id             :slackbot.slack/app-user-id :as req}]
+    (if (not= app-user-id user)
+      (handler req)
+      (do
+        (timbre/debug {:message "Ignoring message from myself"})
+        (-> (response/response nil)
+            (response/status 200))))))
+
 (defn wrap-debug-log-request
   "Emit the entire request map out as a debug log."
   [handler]

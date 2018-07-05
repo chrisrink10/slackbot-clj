@@ -93,8 +93,6 @@
                                  :response response})
 
                   :else
-                  #_ (ex-info "Could not post response message"
-                              response)
                   (timbre/error {:message     "Could not post response message"
                                  :error       (:body response)
                                  :channel     channel

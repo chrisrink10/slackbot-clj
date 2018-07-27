@@ -20,18 +20,23 @@
    [reitit.ring :as ring]
    [taoensso.timbre :as timbre]
    [slackbot.karma :as karma]
-   [slackbot.slack :as slack]))
+   [slackbot.slack :as slack]
+   [slackbot.routes.slash-command.stinkypinky :as slash.stinkypinky]))
 
 (s/def :slackbot.slash-command/channel_id string?)
 (s/def :slackbot.slash-command/team_id string?)
 (s/def :slackbot.slash-command/text string?)
 
 (defmulti slash-command :command)
+(defmethod slash-command "/cooltext" [_]
+  (s/keys :req-un [:slackbot.slash-command/channel_id
+                   :slackbot.slash-command/team_id
+                   :slackbot.slash-command/text]))
 (defmethod slash-command "/give-karma" [_]
   (s/keys :req-un [:slackbot.slash-command/channel_id
                    :slackbot.slash-command/team_id
                    :slackbot.slash-command/text]))
-(defmethod slash-command "/cooltext" [_]
+(defmethod slash-command "/sp" [_]
   (s/keys :req-un [:slackbot.slash-command/channel_id
                    :slackbot.slash-command/team_id
                    :slackbot.slash-command/text]))
@@ -105,7 +110,13 @@
               (response/status 204)))))
     (-> {:response_type "ephemeral"
          :text          "Specify a target and karma as a positive integer."}
-        (response/response)) ))
+        (response/response))))
+
+(defmethod handle "/sp"
+  [{body-params :body-params
+    tx          :slackbot.database/tx
+    token       :slackbot.slack/oauth-access-token}]
+  (slash.stinkypinky/handle-stinky-pinky body-params tx token))
 
 (defmethod handle "/cooltext"
   [{{:keys [team_id channel_id text]} :body-params

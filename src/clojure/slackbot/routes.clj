@@ -25,9 +25,11 @@
    [slackbot.routes.slash-command :as slash-command]
    [slackbot.middleware :refer [wrap-debug-log-request
                                 wrap-format
+                                wrap-ignore-myself
                                 wrap-supply-tx
                                 wrap-supply-slack-details
-                                wrap-verify-slack-token]]))
+                                wrap-verify-slack-token]]
+   [slackbot.stinkypinky :refer [wrap-stinky-pinky-guess]]))
 
 (defstate router
   :start (ring/router
@@ -36,9 +38,11 @@
                                  wrap-verify-slack-token
                                  wrap-supply-tx
                                  wrap-supply-slack-details]}
-            ["/slack-event" {:name ::slack-event
-                             :post (fn [req]
-                                     (slack-event/handle req))}]
+            ["/slack-event" {:name       ::slack-event
+                             :post       (fn [req]
+                                           (slack-event/handle req))
+                             :middleware [wrap-ignore-myself
+                                          wrap-stinky-pinky-guess]}]
             ["/slash-command" {:name ::slash-command
                                :post (fn [req]
                                        (slash-command/handle req))}]]

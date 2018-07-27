@@ -31,7 +31,8 @@
   [{:keys [team_id channel_id text]} tx token]
   (if-let [[_ target] (re-matches #"show (\S+)" text)]
     (do
-      (karma/report-target-karma tx token team_id channel_id target)
+      (->> (karma/normalize-target target)
+           (karma/report-target-karma tx token team_id channel_id))
       (-> (response/response nil)
           (response/status 204)) )
     (-> {:response_type "ephemeral"
@@ -47,7 +48,8 @@
 (defmethod handle-karma "give"
   [{:keys [team_id channel_id text]} tx token]
   (if-let [[_ target n] (re-matches #"give (\S+)( \d+)?" text)]
-    (let [amount (if (some? n)
+    (let [target (karma/normalize-target target)
+          amount (if (some? n)
                    (Integer/parseInt (str/trim n))
                    1)]
       (cond
@@ -73,7 +75,8 @@
 (defmethod handle-karma "take"
   [{:keys [team_id channel_id text]} tx token]
   (if-let [[_ target n] (re-matches #"take (\S+)( \d+)?" text)]
-    (let [amount (if (some? n)
+    (let [target (karma/normalize-target target)
+          amount (if (some? n)
                    (Integer/parseInt (str/trim n))
                    1)]
       (cond

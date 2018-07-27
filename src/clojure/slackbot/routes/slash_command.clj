@@ -19,8 +19,8 @@
    [ring.util.response :as response]
    [reitit.ring :as ring]
    [taoensso.timbre :as timbre]
-   [slackbot.karma :as karma]
    [slackbot.slack :as slack]
+   [slackbot.routes.slash-command.karma :as slash.karma]
    [slackbot.routes.slash-command.stinkypinky :as slash.stinkypinky]))
 
 (s/def :slackbot.slash-command/channel_id string?)
@@ -48,69 +48,10 @@
     command))
 
 (defmethod handle "/karma"
-  [{{:keys [team_id channel_id text]} :body-params
-    tx                                :slackbot.database/tx
-    token                             :slackbot.slack/oauth-access-token}]
-  (if-not (str/blank? text)
-    (->> (str/trim text)
-         (karma/report-target-karma tx token team_id channel_id))
-    (karma/report-top-karma tx token team_id channel_id)))
-
-(defmethod handle "/give-karma"
-  [{{:keys [team_id channel_id text]} :body-params
-    tx                                :slackbot.database/tx
-    token                             :slackbot.slack/oauth-access-token}]
-  (if-let [[_ target n] (re-matches #"(\S+)( \d+)?" text)]
-    (let [amount (if (some? n)
-                   (Integer/parseInt (str/trim n))
-                   1)]
-      (cond
-        (not (int? amount))
-        (-> {:response_type "ephemeral"
-             :text          "Karma must be an integer."}
-            (response/response))
-
-        (< amount 1)
-        (-> {:response_type "ephemeral"
-             :text          "Karma must be greater than or equal to 1."}
-            (response/response))
-
-        :else
-        (do
-          (karma/give-karma tx token team_id channel_id target amount)
-          (-> (response/response nil)
-              (response/status 204)))))
-    (-> {:response_type "ephemeral"
-         :text          "Specify a target and karma as a positive integer."}
-        (response/response)) ))
-
-(defmethod handle "/take-karma"
-  [{{:keys [team_id channel_id text]} :body-params
-    tx                                :slackbot.database/tx
-    token                             :slackbot.slack/oauth-access-token}]
-  (if-let [[_ target n] (re-matches #"(\S+)( \d+)?" text)]
-    (let [amount (if (some? n)
-                   (Integer/parseInt (str/trim n))
-                   1)]
-      (cond
-        (not (int? amount))
-        (-> {:response_type "ephemeral"
-             :text          "Karma must be an integer."}
-            (response/response))
-
-        (< amount 1)
-        (-> {:response_type "ephemeral"
-             :text          "Karma must me greater than or equal to 1."}
-            (response/response))
-
-        :else
-        (do
-          (karma/take-karma tx token team_id channel_id target amount)
-          (-> (response/response nil)
-              (response/status 204)))))
-    (-> {:response_type "ephemeral"
-         :text          "Specify a target and karma as a positive integer."}
-        (response/response))))
+  [{body-params :body-params
+    tx          :slackbot.database/tx
+    token       :slackbot.slack/oauth-access-token}]
+  (slash.karma/handle-karma body-params tx token))
 
 (defmethod handle "/sp"
   [{body-params :body-params

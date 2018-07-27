@@ -15,7 +15,7 @@
 (ns slackbot.routes.slash-command.stinkypinky
   (:require
    [ring.util.response :as response]
-   [slackbot.stinkypinky :as stinky-pinky]))
+   [slackbot.stinkypinky :as stinkypinky]))
 
 (def stinky-pinky-command-pattern #"(\S+)(?: ?(.*))")
 
@@ -30,7 +30,7 @@
   [{:keys [team_id channel_id text]} tx token]
   (if-let [[_ answer] (re-matches #"set-answer (\S+ \S+)" text)]
     (do
-      (stinky-pinky/set-answer tx token team_id channel_id answer)
+      (stinkypinky/set-answer tx token team_id channel_id answer)
       (-> (response/response nil)
           (response/status 204)))
     (-> {:response_type "ephemeral"
@@ -41,7 +41,7 @@
   [{:keys [team_id channel_id text]} tx token]
   (if-let [[_ clue] (re-matches #"set-clue (.*)" text)]
     (do
-      (stinky-pinky/set-clue tx token team_id channel_id clue)
+      (stinkypinky/set-clue tx token team_id channel_id clue)
       (-> (response/response nil)
           (response/status 204)))
     (-> {:response_type "ephemeral"
@@ -52,7 +52,7 @@
   [{:keys [team_id channel_id text]} tx token]
   (if-let [[_ hint] (re-matches #"set-hint (\S+ \S+)" text)]
     (do
-      (stinky-pinky/set-hint tx token team_id channel_id hint)
+      (stinkypinky/set-hint tx token team_id channel_id hint)
       (-> (response/response nil)
           (response/status 204)))
     (-> {:response_type "ephemeral"
@@ -62,7 +62,7 @@
 
 (defmethod handle-stinky-pinky "set-channel"
   [{:keys [team_id channel_id user_id]} tx token]
-  (case (stinky-pinky/set-channel tx token team_id channel_id user_id)
+  (case (stinkypinky/set-channel tx token team_id channel_id user_id)
     :successfully-set-channel (-> (response/response nil)
                                   (response/status 204))
     :channel-already-set (-> {:response_type "ephemeral"
@@ -71,7 +71,7 @@
 
 (defmethod handle-stinky-pinky "show-details"
   [{:keys [team_id channel_id]} tx token]
-  (case (stinky-pinky/show-details tx token team_id channel_id)
+  (case (stinkypinky/show-details tx token team_id channel_id)
     :no-details   (-> {:response_type "ephemeral"
                        :text          "No Stinky Pinky answer is set in the channel."}
                       (response/response))
@@ -80,7 +80,7 @@
 
 (defmethod handle-stinky-pinky "show-guesses"
   [{:keys [team_id channel_id]} tx token]
-  (case (stinky-pinky/show-guesses tx token team_id channel_id)
+  (case (stinkypinky/show-guesses tx token team_id channel_id)
     :no-guesses   (-> {:response_type "ephemeral"
                        :text          "No Stinky Pinky guesses have been made in this channel."}
                       (response/response))
@@ -89,7 +89,7 @@
 
 (defmethod handle-stinky-pinky "show-scores"
   [{:keys [team_id channel_id user_id]} tx token]
-  (case (stinky-pinky/show-scores tx token team_id channel_id user_id)
+  (case (stinkypinky/show-scores tx token team_id channel_id user_id)
     :no-scores   (-> {:response_type "ephemeral"
                       :text          "No Stinky Pinky scores found for this channel."}
                      (response/response))

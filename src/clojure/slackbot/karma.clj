@@ -14,22 +14,27 @@
 
 (ns slackbot.karma
   (:require
+   [clojure.string :as str]
    [slackbot.database.karma :as db.karma]
    [slackbot.slack :as slack]))
+
+(defn normalize-target
+  [target]
+  (-> target (str/trim) (str/lower-case)))
 
 (defn inc-karma-seq
   "Given a Slack message, return a seq of targets which should receive a
   karma point from the message."
   [text]
   (->> (re-seq #"(\S+)\+\+" text)
-       (map second)))
+       (map (comp normalize-target second))))
 
 (defn dec-karma-seq
   "Given a Slack message, return a seq of targets which should lose a
   karma point from the message."
   [text]
   (->> (re-seq #"(\S+)\-\-" text)
-       (map second)))
+       (map (comp normalize-target second))))
 
 (defn report-target-karma
   "Report the karma of a target to the specified channel."

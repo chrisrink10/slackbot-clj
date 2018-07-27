@@ -19,6 +19,7 @@
    java.io.OutputStreamWriter
    java.io.OutputStream)
   (:require
+   [clojure.pprint :as pprint]
    [clojure.walk :as walk]
    [jdbc.core :as jdbc]
    [medley.core :refer [ex-message]]
@@ -152,9 +153,9 @@
 (defn wrap-ignore-myself
   "Ignore Slack Events from the app."
   [handler]
-  (fn [{{{:keys [user]} :event} :body-params
-        app-user-id             :slackbot.slack/app-user-id :as req}]
-    (if (not= app-user-id user)
+  (fn [{{{:keys [user]} :event type :type} :body-params
+        app-user-id                        :slackbot.slack/app-user-id :as req}]
+    (if (or (not= app-user-id user) (= "url_verification" type))
       (handler req)
       (do
         (timbre/debug {:message "Ignoring message from myself"})
@@ -165,7 +166,7 @@
   "Emit the entire request map out as a debug log."
   [handler]
   (fn debug-log-request [req]
-    (timbre/debug req)
+    (timbre/debug (with-out-str (pprint/pprint req)))
     (let [resp (handler req)]
-      (timbre/debug resp)
+      (timbre/debug (with-out-str (pprint/pprint resp)))
       resp)))

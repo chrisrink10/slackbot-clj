@@ -47,13 +47,21 @@ INSERT OR REPLACE INTO stinkypinky
 VALUES
   (:workspace_id, :channel_id, :game_id, :host, :hint, :clue, :solution)
 
--- :name get-stinky-pinky-scores :? :1
+-- :name get-stinky-pinky-scores :? :n
 -- :doc Get the Stinky Pinky scores.
 SELECT COUNT(winner) AS winner_count, winner
 FROM stinkypinky_winners
 WHERE workspace_id = :workspace_id
 AND channel_id = :channel_id
 GROUP BY winner
+LIMIT :n
+
+-- :name get-stinky-pinky-guesses :? :n
+-- :doc Get the Stinky Pinky scores.
+SELECT guesser, guess
+FROM stinkypinky_guesses
+WHERE workspace_id = :workspace_id
+AND channel_id = :channel_id
 
 -- :name mark-winner :! :n
 -- :doc Mark the winner of a Stinky Pinky round.

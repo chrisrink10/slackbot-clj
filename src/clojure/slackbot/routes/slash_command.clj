@@ -169,6 +169,24 @@
            :text          "This channel is already a Stinky Pinky channel."}
           (response/response)))))
 
+(defmethod handle-stinky-pinky "show-details"
+  [{:keys [team_id channel_id]} tx token]
+  (case (stinky-pinky/show-details tx token team_id channel_id)
+    :no-details   (-> {:response_type "ephemeral"
+                       :text          "No Stinky Pinky answer is set in the channel."}
+                      (response/response))
+    :details-sent (-> (response/response nil)
+                      (response/status 204))))
+
+(defmethod handle-stinky-pinky "show-guesses"
+  [{:keys [team_id channel_id]} tx token]
+  (case (stinky-pinky/show-guesses tx token team_id channel_id)
+    :no-guesses   (-> {:response_type "ephemeral"
+                       :text          "No Stinky Pinky guesses have been made in this channel."}
+                      (response/response))
+    :guesses-sent (-> (response/response nil)
+                      (response/status 204))))
+
 (defmethod handle-stinky-pinky "show-scores"
   [{:keys [team_id channel_id user_id]} tx token]
   (case (stinky-pinky/show-scores tx token team_id channel_id user_id)
@@ -185,7 +203,7 @@
                                  "each hosted by a single player. The host of the round will "
                                  "think of a pair of words that rhyme (like \"stinky pinky\"), "
                                  "for instance. The host will also think of a clue (like \"smelly "
-                                 " finger\" for the previous answer). Other players enter a clue "
+                                 "finger\" for the previous answer). Other players enter a clue "
                                  "into the Stinky Pinky channel by guessing word pairs until the "
                                  "answer is guessed. The player which correctly guesses the pair "
                                  "hosts the next round. The game can continue ad nauseum or to a "
@@ -195,6 +213,8 @@
                             "- `set-clue [clue]` - if you are the host, set the clue for this round"
                             "- `set-hint [hint]` - if you are the host, set the hint for this round"
                             "- `set-channel` - set the current channel as a Stinky Pinky channel and set you as the host of the first round"
+                            "- `show-details` - show the host, clue, and _optional_ clue"
+                            "- `show-guesses` - show the guesses players have made in the current channel's Stinky Pinky game"
                             "- `show-scores` - show the scores for players in the current channel's Stinky Pinky game"
                             "- `reset` - reset the scores and finish the game"
                             "- `help` - show this text"]

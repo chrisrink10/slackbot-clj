@@ -14,14 +14,24 @@
 
 (ns slackbot.stinkypinky
   (:require
+   [clojure.string :as str]
    [taoensso.timbre :as timbre]
    [slackbot.database.stinkypinky :as db.stinkypinky]
    [slackbot.slack :as slack]))
 
+(defn normalize-solution
+  "Normalize a solution so we don't have to check as many cases in
+  the database when a guess comes in."
+  [s]
+  (-> (str/lower-case s)
+      (str/split #" ")
+      (sort)
+      (->> (str/join " "))))
+
 (defn guess
   "Get a Stinky Pinky guess if it is valid."
   [text]
-  (some->> text (re-matches #"(\S+ \S+)") (second)))
+  (some-> text (re-matches #"(\S+ \S+)") (second) (normalize-solution)))
 
 (defn is-guess-correct?
   "Return true if the guess given was correct."
@@ -99,7 +109,7 @@
   [tx token workspace-id channel-id solution]
   (let [details (db.stinkypinky/get-stinky-pinky-details tx {:workspace_id workspace-id
                                                              :channel_id   channel-id})]
-    (->> solution
+    (->> (normalize-solution solution)
          (assoc details :solution)
          (db.stinkypinky/set-stinky-pinky-details tx))
     (slack/send-message token
@@ -142,16 +152,58 @@
                    :workspace-id workspace-id
                    :channel-id   channel-id})))
 
+(defn show-details
+  "Send the details from the current game to the channel."
+  [tx token workspace-id channel-id]
+  (if-let [{:keys [host hint clue]}
+           (db.stinkypinky/get-stinky-pinky-details tx
+                                                    {:workspace_id workspace-id
+                                                     :channel_id   channel-id})]
+    (let [user-ref (slack/user-ref host)
+          msg      (str user-ref " is hosting the current round." \newline
+                        (if (some? clue)
+                          (str "The clue is: `" clue "`.")
+                          (str "No clue has been set."))
+                        (when (some? hint)
+                          (str \newline "The hint is: `" hint "`.")))]
+      (slack/send-message token
+                          {:channel channel-id
+                           :text    msg})
+      :details-sent)
+    :no-details))
+
+(defn show-guesses
+  "Send the guesses from the current game to the channel."
+  [tx token workspace-id channel-id]
+  (if-let [guesses (db.stinkypinky/get-stinky-pinky-guesses tx
+                                                            {:workspace_id workspace-id
+                                                             :channel_id   channel-id})]
+    (let [msg (->> guesses
+                   (map-indexed (fn [i {:keys [guesser guess]}]
+                                  (let [user-ref (slack/user-ref guesser)]
+                                    (str (inc i) ". *" user-ref "* guessed `" guess "`."))))
+                   (interpose \newline)
+                   (apply str))]
+      (slack/send-message token
+                          {:channel     channel-id
+                           :attachments [{:title    "Stinky Pinky Guesses"
+                                          :fallback msg
+                                          :text     msg}]})
+      :guesses-sent)
+    :no-guesses))
+
 (defn show-scores
   "Send the scores of the current game to the channel."
   [tx token workspace-id channel-id user-id]
   (if-let [counts (db.stinkypinky/get-stinky-pinky-scores tx
                                                           {:workspace_id workspace-id
                                                            :channel_id   channel-id
-                                                           :user_id      user-id})]
+                                                           :n            20})]
     (let [msg (->> counts
                    (map-indexed (fn [i {:keys [winner_count winner]}]
-                                  (str (inc i) ". *" winner "* has _" winner_count "_ points.")))
+                                  (let [final-word (cond-> "point" (not= winner_count 1) (str "s"))
+                                        user-ref   (slack/user-ref winner)]
+                                    (str (inc i) ". *" user-ref "* has _" winner_count "_ " final-word "."))))
                    (interpose \newline)
                    (apply str))]
       (slack/send-message token
@@ -159,7 +211,7 @@
                            :attachments [{:title    "Stinky Pinky Scores"
                                           :fallback msg
                                           :text     msg}]})
-      :sent)
+      :scores-sent)
     :no-scores))
 
 (defn wrap-stinky-pinky-guess

@@ -22,6 +22,13 @@
    [slackbot.config :as config]
    [slackbot.http :as http]))
 
+(defn user-ref
+  "Generate a string user reference from a user ID."
+  ([user-id]
+   (str "<@" user-id ">"))
+  ([user-id username]
+   (str "<@" user-id "|" username ">")))
+
 (defn auth-header
   "Generate an Authorization header befitting a Slack POST request."
   [token]

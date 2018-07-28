@@ -49,8 +49,7 @@
                    :channel-id        channel-id
                    :user-id           user-id
                    :guess             guess
-                   :is-guess-correct? is_guess_correct
-                   :is-guesser-host?  is_guesser_host})
+                   :is-guess-correct? is_guess_correct})
     (cond
       (= 1 is_guess_correct) :guess-is-correct
       :else                  :guess-is-wrong)))

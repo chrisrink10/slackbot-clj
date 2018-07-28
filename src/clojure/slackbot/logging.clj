@@ -12,34 +12,12 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-(ns slackbot-dev
+(ns slackbot.logging
   (:require
-   [clojure.test :as test]
-   [clojure.tools.namespace.repl :as repl]
-   [mount.core :as mount :refer [defstate]]
-   [slackbot.database]
-   [slackbot.database.migrations :as migrations]
-   [slackbot.logging]
-   [slackbot.web-server]))
+   [mount.core :refer [defstate]]
+   [taoensso.timbre :as timbre]
+   [slackbot.config :as config]))
 
-(defstate database-migrations
-  :start (migrations/migrate))
-
-(defn start
-  []
-  (mount/start)
-  :ready)
-
-(defn stop
-  []
-  (mount/stop))
-
-(defn reset
-  []
-  (stop)
-  (repl/refresh :after 'slackbot-dev/start))
-
-(defn run-all-tests
-  []
-  (repl/refresh)
-  (test/run-all-tests #"slackbot.*-test"))
+(defstate logging-config
+  :start (->> (config/config [:logging :level])
+              (timbre/set-level!)))

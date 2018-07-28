@@ -78,11 +78,11 @@
       (if (db.stinkypinky/is-solution-set? tx {:workspace_id workspace-id
                                                :channel_id   channel-id})
         (do
-          (timbre/debug {:message      "Received guess with no solution set"
-                         :workspace-id workspace-id
-                         :channel-id   channel-id
-                         :user-id      user-id
-                         :guess        text})
+          (timbre/info {:message      "Received Stinky Pinky guess with no solution set"
+                        :workspace-id workspace-id
+                        :channel-id   channel-id
+                        :user-id      user-id
+                        :guess        text})
           (slack/send-ephemeral token
                                 {:channel channel-id
                                  :user    user-id
@@ -90,6 +90,11 @@
         (case (is-guess-correct? tx token workspace-id channel-id user-id guess)
           :guess-is-correct
           (do
+            (timbre/info {:message      "Received correct Stinky Pinky guess"
+                          :workspace-id workspace-id
+                          :channel-id   channel-id
+                          :user-id      user-id
+                          :guess        text})
             (db.stinkypinky/mark-winner tx {:workspace_id workspace-id
                                             :channel_id   channel-id
                                             :winner       user-id})
@@ -101,6 +106,11 @@
 
           :guess-is-wrong
           (do
+            (timbre/info {:message      "Received wrong Stinky Pinky guess"
+                          :workspace-id workspace-id
+                          :channel-id   channel-id
+                          :user-id      user-id
+                          :guess        text})
             (db.stinkypinky/mark-guess tx {:workspace_id workspace-id
                                            :channel_id   channel-id
                                            :guesser      user-id
@@ -110,48 +120,82 @@
 
           :guesser-is-host
           (do
-            (timbre/debug {:message      "Received guess from the host"
-                           :workspace-id workspace-id
-                           :channel-id   channel-id
-                           :user-id      user-id
-                           :guess        text})
+            (timbre/info {:message      "Received Stinky Pinky guess from the host"
+                          :workspace-id workspace-id
+                          :channel-id   channel-id
+                          :user-id      user-id
+                          :guess        text})
             (slack/send-ephemeral token
                                   {:channel channel-id
                                    :user    user-id
                                    :text    "You cannot guess for a round you are hosting!"})))))))
 
+(defn- wrap-check-stinky-pinky-host
+  "Wrap a function to set new Stinky Pinky details with a check to make
+  sure they are the user hosting the current round."
+  [tx token workspace-id channel-id user-id f]
+  (let [{:keys [host] :as details}
+        (db.stinkypinky/get-stinky-pinky-details tx {:workspace_id workspace-id
+                                                     :channel_id   channel-id})]
+    (if (= host user-id)
+      (f details)
+      (do
+        (timbre/info {:message "User who is not hosting Stinky Pinky attempted to modify SP details"
+                      :workspace-id workspace-id
+                      :channel-id   channel-id
+                      :user-id      user-id})
+        (slack/send-ephemeral token
+                              {:channel channel-id
+                               :user    user-id
+                               :text    "You are not hosting this round, so you may not change the Stinky Pinky solution, clue, or hint!"})))))
+
 (defn set-answer
-  [tx token workspace-id channel-id solution]
-  (let [details (db.stinkypinky/get-stinky-pinky-details tx {:workspace_id workspace-id
-                                                             :channel_id   channel-id})]
-    (->> (normalize-solution solution)
-         (assoc details :solution)
-         (db.stinkypinky/set-stinky-pinky-details tx))
-    (slack/send-message token
-                        {:channel channel-id
-                         :text    (str "An answer has been set for Stinky Pinky. Game on!")})))
+  [tx token workspace-id channel-id user-id solution]
+  (wrap-check-stinky-pinky-host
+   tx
+   token
+   workspace-id
+   channel-id
+   user-id
+   (fn [details]
+     (->> (normalize-solution solution)
+          (assoc details :solution)
+          (db.stinkypinky/set-stinky-pinky-details tx))
+     (slack/send-message token
+                         {:channel channel-id
+                          :text    (str "An answer has been set for Stinky Pinky. Game on!")}))))
 
 (defn set-clue
-  [tx token workspace-id channel-id clue]
-  (let [details (db.stinkypinky/get-stinky-pinky-details tx {:workspace_id workspace-id
-                                                             :channel_id   channel-id})]
-    (->> clue
-         (assoc details :clue)
-         (db.stinkypinky/set-stinky-pinky-details tx))
-    (slack/send-message token
-                        {:channel channel-id
-                         :text    (str "The Stinky Pinky clue is: _" clue "_")})))
+  [tx token workspace-id channel-id user-id clue]
+  (wrap-check-stinky-pinky-host
+   tx
+   token
+   workspace-id
+   channel-id
+   user-id
+   (fn [details]
+     (->> clue
+          (assoc details :clue)
+          (db.stinkypinky/set-stinky-pinky-details tx))
+     (slack/send-message token
+                         {:channel channel-id
+                          :text    (str "The Stinky Pinky clue is: _" clue "_")}))))
 
 (defn set-hint
-  [tx token workspace-id channel-id hint]
-  (let [details (db.stinkypinky/get-stinky-pinky-details tx {:workspace_id workspace-id
-                                                             :channel_id   channel-id})]
-    (->> hint
-         (assoc details :hint)
-         (db.stinkypinky/set-stinky-pinky-details tx))
-    (slack/send-message token
-                        {:channel channel-id
-                         :text    (str "The Stinky Pinky hint is: _" hint "_")})))
+  [tx token workspace-id channel-id user-id hint]
+  (wrap-check-stinky-pinky-host
+   tx
+   token
+   workspace-id
+   channel-id
+   user-id
+   (fn [details]
+     (->> hint
+          (assoc details :hint)
+          (db.stinkypinky/set-stinky-pinky-details tx))
+     (slack/send-message token
+                         {:channel channel-id
+                          :text    (str "The Stinky Pinky hint is: _" hint "_")}))))
 
 (defn set-channel
   "Set the channel ID given as a stinky pinky channel."

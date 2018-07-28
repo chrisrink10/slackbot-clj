@@ -20,6 +20,7 @@
    [mount.core :as mount]
    [slackbot.database]
    [slackbot.database.migrations :as migrations]
+   [slackbot.logging]
    [slackbot.web-server]))
 
 (defn usage

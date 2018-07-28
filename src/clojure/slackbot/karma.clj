@@ -16,7 +16,8 @@
   (:require
    [clojure.string :as str]
    [slackbot.database.karma :as db.karma]
-   [slackbot.slack :as slack]))
+   [slackbot.slack :as slack]
+   [taoensso.timbre :as timbre]))
 
 (defn normalize-target
   [target]
@@ -76,6 +77,11 @@
    (let [{new-amount :karma} (db.karma/inc-karma tx {:workspace_id team-id
                                                      :target       target
                                                      :karma        amount})]
+     (timbre/info {:message    "Giving karma"
+                   :team-id    team-id
+                   :channel-id channel-id
+                   :target     target
+                   :amount     amount})
      (slack/send-message token
                          {:channel channel-id
                           :text    (str target " now has " new-amount " karma!")}))))
@@ -89,6 +95,11 @@
    (let [{new-amount :karma} (db.karma/dec-karma tx {:workspace_id team-id
                                                      :target       target
                                                      :karma        amount})]
+     (timbre/info {:message    "Taking karma"
+                   :team-id    team-id
+                   :channel-id channel-id
+                   :target     target
+                   :amount     amount})
      (slack/send-message token
                          {:channel channel-id
                           :text    (str target " now has " new-amount " karma!")}))))

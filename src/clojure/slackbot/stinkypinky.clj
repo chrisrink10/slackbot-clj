@@ -78,11 +78,11 @@
       (if (db.stinkypinky/is-solution-set? tx {:workspace_id workspace-id
                                                :channel_id   channel-id})
         (do
-          (timbre/debug {:message      "Received guess with no solution set"
-                         :workspace-id workspace-id
-                         :channel-id   channel-id
-                         :user-id      user-id
-                         :guess        text})
+          (timbre/info {:message      "Received Stinky Pinky guess with no solution set"
+                        :workspace-id workspace-id
+                        :channel-id   channel-id
+                        :user-id      user-id
+                        :guess        text})
           (slack/send-ephemeral token
                                 {:channel channel-id
                                  :user    user-id
@@ -90,6 +90,11 @@
         (case (is-guess-correct? tx token workspace-id channel-id user-id guess)
           :guess-is-correct
           (do
+            (timbre/info {:message      "Received correct Stinky Pinky guess"
+                          :workspace-id workspace-id
+                          :channel-id   channel-id
+                          :user-id      user-id
+                          :guess        text})
             (db.stinkypinky/mark-winner tx {:workspace_id workspace-id
                                             :channel_id   channel-id
                                             :winner       user-id})
@@ -101,6 +106,11 @@
 
           :guess-is-wrong
           (do
+            (timbre/info {:message      "Received wrong Stinky Pinky guess"
+                          :workspace-id workspace-id
+                          :channel-id   channel-id
+                          :user-id      user-id
+                          :guess        text})
             (db.stinkypinky/mark-guess tx {:workspace_id workspace-id
                                            :channel_id   channel-id
                                            :guesser      user-id

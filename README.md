@@ -4,7 +4,28 @@ A Slackbot written in Clojure.
 
 ## Getting Started
 
-TBD
+### With Docker
+
+Bring your database up to date, then start the Slackbot and `nginx`
+reverse proxy:
+
+```bash
+docker-compose up --build migrate
+docker-compose up --build -d slackbot
+docker-compose up -d nginx
+```
+
+### For Development
+
+You can start a REPL with `lein repl` and start the web-server with
+`(reset)` once the REPL is started.
+
+## Features
+
+ * Give people or things _karma_ points using simple `++` or `--` 
+   suffixes: `zelda++` or `jerry--`
+
+ * Play Stinky Pinky with your friends or colleagues using `/sp`
 
 ## License
 

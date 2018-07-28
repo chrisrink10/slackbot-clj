@@ -27,10 +27,10 @@
   :default "help")
 
 (defmethod handle-stinky-pinky "set-answer"
-  [{:keys [team_id channel_id text]} tx token]
+  [{:keys [team_id channel_id user_id text]} tx token]
   (if-let [[_ answer] (re-matches #"set-answer (\S+ \S+)" text)]
     (do
-      (stinkypinky/set-answer tx token team_id channel_id answer)
+      (stinkypinky/set-answer tx token team_id channel_id user_id answer)
       (-> (response/response nil)
           (response/status 204)))
     (-> {:response_type "ephemeral"
@@ -38,10 +38,10 @@
         (response/response))))
 
 (defmethod handle-stinky-pinky "set-clue"
-  [{:keys [team_id channel_id text]} tx token]
+  [{:keys [team_id channel_id user_id text]} tx token]
   (if-let [[_ clue] (re-matches #"set-clue (.*)" text)]
     (do
-      (stinkypinky/set-clue tx token team_id channel_id clue)
+      (stinkypinky/set-clue tx token team_id channel_id user_id clue)
       (-> (response/response nil)
           (response/status 204)))
     (-> {:response_type "ephemeral"
@@ -49,10 +49,10 @@
         (response/response))))
 
 (defmethod handle-stinky-pinky "set-hint"
-  [{:keys [team_id channel_id text]} tx token]
+  [{:keys [team_id channel_id user_id text]} tx token]
   (if-let [[_ hint] (re-matches #"set-hint (\S+ \S+)" text)]
     (do
-      (stinkypinky/set-hint tx token team_id channel_id hint)
+      (stinkypinky/set-hint tx token team_id channel_id user_id hint)
       (-> (response/response nil)
           (response/status 204)))
     (-> {:response_type "ephemeral"

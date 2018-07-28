@@ -16,7 +16,14 @@
   (:require
    [clojure.spec.alpha :as s]
    [cprop.core :as cprop]
-   [cprop.source :as source]))
+   [cprop.source :as source]
+   [taoensso.timbre :as timbre]))
+
+(s/def :slackbot.database/connection-string string?)
+(s/def :slackbot.config/database (s/keys :req-un [:slackbot.database/connection-string]))
+
+(s/def :slackbot.logging/level timbre/-levels-set)
+(s/def :slackbot.config/logging (s/keys :req-un [:slackbot.logging/level]))
 
 (s/def :slackbot.slack/api-url string?)
 (s/def :slackbot.slack/client-id string?)
@@ -33,7 +40,9 @@
 (s/def :slackbot.web-server/web-server (s/keys :req-un [:slackbot.web-server/host
                                                         :slackbot.web-server/port]))
 
-(s/def :slackbot.config/slackbot (s/keys :req-un [:slackbot.config/slack
+(s/def :slackbot.config/slackbot (s/keys :req-un [:slackbot.config/database
+                                                  :slackbot.config/logging
+                                                  :slackbot.config/slack
                                                   :slackbot.config/web-server]))
 
 (s/def :slackbot/config (s/keys :req-un [:slackbot.config/slackbot]))

@@ -32,21 +32,6 @@ FROM stinkypinky
 WHERE workspace_id = :workspace_id
 AND channel_id = :channel_id
 
--- :name is-solution-set? :? :1
--- :doc Return 1 if a solution is set for the current channel.
-SELECT solution IS NOT NULL as solution_is_set
-FROM stinkypinky
-WHERE workspace_id = :workspace_id
-AND channel_id = :channel_id
-
--- :name check-stinky-pinky-guess :? :1
--- :doc Get the Stinky Pinky channels for the workspace.
-SELECT host = :user_id AS is_guesser_host, 1 AS is_guess_correct
-FROM stinkypinky
-WHERE workspace_id = :workspace_id
-AND channel_id = :channel_id
-AND solution = :guess
-
 -- :name set-stinky-pinky-details :! :n
 -- :doc Set the details for this Stinky Pink round.
 INSERT OR REPLACE INTO stinkypinky

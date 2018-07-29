@@ -19,7 +19,8 @@
    [clojure.string :as str]
    [taoensso.timbre :as timbre]
    [slackbot.database.stinkypinky :as db.stinkypinky]
-   [slackbot.slack :as slack]))
+   [slackbot.slack :as slack]
+   [slackbot.database :as db]))
 
 (defn normalize-solution
   "Normalize a solution so we don't have to check as many cases in
@@ -34,27 +35,6 @@
   "Get a Stinky Pinky guess if it is valid."
   [text]
   (some->> text (re-matches #"(\S+ \S+)") (second) (normalize-solution)))
-
-(defn is-guess-correct?
-  "Return true if the guess given was correct."
-  [tx token workspace-id channel-id user-id guess]
-  (let [{:keys [is_guesser_host is_guess_correct]}
-        (->> {:workspace_id workspace-id
-              :channel_id   channel-id
-              :guess        guess
-              :user_id      user-id}
-             (db.stinkypinky/check-stinky-pinky-guess tx))]
-    (timbre/debug {:message           "Checking Stinky Pinky guess"
-                   :workspace-id      workspace-id
-                   :channel-id        channel-id
-                   :user-id           user-id
-                   :guess             guess
-                   :is-guess-correct? is_guess_correct
-                   :is-guesser-host?  is_guesser_host})
-    (cond
-      (= 1 is_guesser_host)  :guesser-is-host
-      (= 1 is_guess_correct) :guess-is-correct
-      :else                  :guess-is-wrong)))
 
 (defn reset-game
   "Reset a Stinky Pinky game to a new host."
@@ -72,11 +52,18 @@
 (defn check-guess
   "Check if a message is a Stinky Pinky guess and check if it is correct
   for the channel."
-  [tx token workspace-id channel-id user-id text]
+  [tx token user-id text {:keys [solution host] workspace-id :workspace_id channel-id :channel_id}]
   (when-let [guess (guess text)]
     (let [user-ref (slack/user-ref user-id)]
-      (if (db.stinkypinky/is-solution-set? tx {:workspace_id workspace-id
-                                               :channel_id   channel-id})
+      (cond
+        (= host user-id)
+        (timbre/info {:message      "Received (possible) guess from Stinky Pinky host"
+                      :workspace-id workspace-id
+                      :channel-id   channel-id
+                      :user-id      user-id
+                      :guess        text})
+
+        (nil? solution)
         (do
           (timbre/info {:message      "Received Stinky Pinky guess with no solution set"
                         :workspace-id workspace-id
@@ -87,48 +74,50 @@
                                 {:channel channel-id
                                  :user    user-id
                                  :text    "No solution is set at the moment!"}))
-        (case (is-guess-correct? tx token workspace-id channel-id user-id guess)
-          :guess-is-correct
-          (do
-            (timbre/info {:message      "Received correct Stinky Pinky guess"
-                          :workspace-id workspace-id
-                          :channel-id   channel-id
-                          :user-id      user-id
-                          :guess        text})
-            (db.stinkypinky/mark-winner tx {:workspace_id workspace-id
-                                            :channel_id   channel-id
-                                            :winner       user-id})
-            (reset-game tx token workspace-id channel-id user-id)
-            (slack/send-message token {:channel channel-id
-                                       :text    (str user-ref " got it! They will be "
-                                                     "hosting a new round. Type `/sp help` "
-                                                     "to learn the commands for hosting.")}))
 
-          :guess-is-wrong
-          (do
-            (timbre/info {:message      "Received wrong Stinky Pinky guess"
-                          :workspace-id workspace-id
-                          :channel-id   channel-id
-                          :user-id      user-id
-                          :guess        text})
-            (db.stinkypinky/mark-guess tx {:workspace_id workspace-id
-                                           :channel_id   channel-id
-                                           :guesser      user-id
-                                           :guess        guess})
-            (slack/send-message token {:channel channel-id
-                                       :text    (str "Wrong " user-ref "!")}))
+        (= solution guess)
+        (do
+          (timbre/info {:message      "Received correct Stinky Pinky guess"
+                        :workspace-id workspace-id
+                        :channel-id   channel-id
+                        :user-id      user-id
+                        :guess        text})
+          (db.stinkypinky/mark-winner tx {:workspace_id workspace-id
+                                          :channel_id   channel-id
+                                          :winner       user-id})
+          (reset-game tx token workspace-id channel-id user-id)
+          (slack/send-message token {:channel channel-id
+                                     :text    (str user-ref " got it! They will be "
+                                                   "hosting a new round. Type `/sp help` "
+                                                   "to learn the commands for hosting.")}))
 
-          :guesser-is-host
-          (do
-            (timbre/info {:message      "Received Stinky Pinky guess from the host"
-                          :workspace-id workspace-id
-                          :channel-id   channel-id
-                          :user-id      user-id
-                          :guess        text})
-            (slack/send-ephemeral token
-                                  {:channel channel-id
-                                   :user    user-id
-                                   :text    "You cannot guess for a round you are hosting!"})))))))
+        :else
+        (do
+          (timbre/info {:message      "Received wrong Stinky Pinky guess"
+                        :workspace-id workspace-id
+                        :channel-id   channel-id
+                        :user-id      user-id
+                        :guess        text})
+          (db.stinkypinky/mark-guess tx {:workspace_id workspace-id
+                                         :channel_id   channel-id
+                                         :guesser      user-id
+                                         :guess        guess})
+          (slack/send-message token {:channel channel-id
+                                     :text    (str "Wrong " user-ref "!")}))))))
+
+(defn wrap-stinky-pinky-guess
+  "Check Stinky Pinky guesses from incoming messages."
+  [handler]
+  (fn [{{:keys [team_id event]} :body-params
+        tx                      :slackbot.database/tx
+        token                   :slackbot.slack/oauth-access-token :as req}]
+    (let [{:keys [channel user type text]} event]
+      (when (= "message" type)
+        (when-let [details
+                   (db.stinkypinky/get-stinky-pinky-details tx {:workspace_id team_id
+                                                                :channel_id   channel})]
+          (check-guess tx token user text details))))
+    (handler req)))
 
 (defn- wrap-check-stinky-pinky-host
   "Wrap a function to set new Stinky Pinky details with a check to make
@@ -278,14 +267,3 @@
                                           :text     msg}]})
       :scores-sent)
     :no-scores))
-
-(defn wrap-stinky-pinky-guess
-  "Check Stinky Pinky guesses from incoming messages."
-  [handler]
-  (fn [{{:keys [team_id event]} :body-params
-        tx                      :slackbot.database/tx
-        token                   :slackbot.slack/oauth-access-token :as req}]
-    (let [{:keys [channel user type text]} event]
-      (when (= "message" type)
-        (check-guess tx token team_id channel user text)))
-    (handler req)))

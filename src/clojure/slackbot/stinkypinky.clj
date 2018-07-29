@@ -108,14 +108,14 @@
 (defn wrap-stinky-pinky-guess
   "Check Stinky Pinky guesses from incoming messages."
   [handler]
-  (fn [{{:keys [team_id channel_id event]} :body-params
-        tx                                 :slackbot.database/tx
-        token                              :slackbot.slack/oauth-access-token :as req}]
+  (fn [{{:keys [team_id event]} :body-params
+        tx                      :slackbot.database/tx
+        token                   :slackbot.slack/oauth-access-token :as req}]
     (let [{:keys [channel user type text]} event]
       (when (= "message" type)
         (when-let [details
                    (db.stinkypinky/get-stinky-pinky-details tx {:workspace_id team_id
-                                                                :channel_id   channel_id})]
+                                                                :channel_id   channel})]
           (check-guess tx token user text details))))
     (handler req)))
 

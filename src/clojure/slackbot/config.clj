@@ -25,6 +25,9 @@
 (s/def :slackbot.logging/level timbre/-levels-set)
 (s/def :slackbot.config/logging (s/keys :req-un [:slackbot.logging/level]))
 
+(s/def :slackbot.proxy/bot-api-url string?)
+(s/def :slackbot.config/proxy (s/keys :opt-un [:slackbot.proxy/bot-api-url]))
+
 (s/def :slackbot.slack/api-url string?)
 (s/def :slackbot.slack/client-id string?)
 (s/def :slackbot.slack/client-secret string?)
@@ -43,7 +46,8 @@
 (s/def :slackbot.config/slackbot (s/keys :req-un [:slackbot.config/database
                                                   :slackbot.config/logging
                                                   :slackbot.config/slack
-                                                  :slackbot.config/web-server]))
+                                                  :slackbot.config/web-server]
+                                         :opt-un [:slackbot.config/proxy]))
 
 (s/def :slackbot/config (s/keys :req-un [:slackbot.config/slackbot]))
 

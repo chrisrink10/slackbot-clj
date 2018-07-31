@@ -20,6 +20,7 @@
    [mount.core :as mount]
    [slackbot.database]
    [slackbot.database.migrations :as migrations]
+   [slackbot.proxy]
    [slackbot.logging]
    [slackbot.web-server]))
 

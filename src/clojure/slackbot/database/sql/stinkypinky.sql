@@ -68,3 +68,9 @@ INSERT INTO stinkypinky_guesses
   (workspace_id, channel_id, guesser, guess)
 VALUES
   (:workspace_id, :channel_id, :guesser, :guess)
+
+-- :name clear-guesses :! :n
+-- :doc Clear all the guesses recorded for the last Stinky Pinky round.
+DELETE FROM stinkypinky_guesses
+WHERE workspace_id = :workspace_id
+AND channel_id = :channel_id

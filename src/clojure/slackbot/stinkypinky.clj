@@ -39,15 +39,17 @@
 (defn reset-game
   "Reset a Stinky Pinky game to a new host."
   [tx token workspace-id channel-id user-id]
-  (as-> {:workspace_id workspace-id
-         :channel_id   channel-id} $
-    (db.stinkypinky/get-stinky-pinky-details tx $)
-    (assoc $
-           :host user-id
-           :solution nil
-           :clue nil
-           :hint nil)
-    (db.stinkypinky/set-stinky-pinky-details tx $)))
+  (let [details {:workspace_id workspace-id
+                 :channel_id   channel-id}]
+    (db.stinkypinky/clear-guesses tx details)
+    (as-> details $
+      (db.stinkypinky/get-stinky-pinky-details tx $)
+      (assoc $
+             :host user-id
+             :solution nil
+             :clue nil
+             :hint nil)
+      (db.stinkypinky/set-stinky-pinky-details tx $))))
 
 (defn check-guess
   "Check if a message is a Stinky Pinky guess and check if it is correct

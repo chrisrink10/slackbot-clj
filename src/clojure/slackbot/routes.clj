@@ -54,7 +54,7 @@
             ["/install" {:name ::app-install
                          :get  app-auth/install}]]]
           {::rs/explain expound/expound-str
-           :validate    rrs/validate-spec!}))
+           :validate    rrs/validate}))
 
 (defstate app
   :start (ring/ring-handler

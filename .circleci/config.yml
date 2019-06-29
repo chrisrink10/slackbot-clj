@@ -1,0 +1,18 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/repo
+    docker:
+      - image: circleci/clojure:openjdk-8-lein-2.9.1
+    steps:
+      - checkout
+      - restore_cache:
+          key: slackbot-clj-v0-{{ checksum "project.clj" }}
+      - run: lein deps
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: slackbot-clj-v0-{{ checksum "project.clj" }}
+      - run: |
+          lein do test, check, uberjar, bikeshed, eastwood
+          # lein nvd check

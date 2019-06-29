@@ -47,8 +47,11 @@
                        :resource-paths ["env/prod/resources"]}
              :dev     {:dependencies   [[org.clojure/tools.namespace "0.2.11"]
                                         [org.clojure/tools.trace "0.7.9"]]
-                       :plugins        [[jonase/eastwood "0.2.6"]
-                                        [lein-nvd "0.5.3"]]
+                       :plugins        [[jonase/eastwood "0.3.5"]
+                                        [lein-bikeshed "0.5.2"]
+                                        [lein-kibit "0.1.6"]
+                                        [lein-nvd "1.1.1"]]
+                       :bikeshed       {:long-lines false}
                        :eastwood       {:config-files ["resources/eastwood_config.clj"]}
                        :source-paths   ["env/dev/src"]
                        :resource-paths ["env/dev/resources"]

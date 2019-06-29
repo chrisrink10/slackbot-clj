@@ -1,4 +1,4 @@
-;; Copyright 2018-2019 Chris Rink
+;; Copyright 2018 Chris Rink
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -139,26 +139,19 @@
 (defn wrap-verify-slack-token
   "Check for a Slack Verification token in the request body and reject the
   request if it does not match the known verification token."
-  ([handler]
-   (->> (config/config [:slack :verification-token])
-        (wrap-verify-slack-token handler)))
-  ([handler verification-token]
-   (fn [{{:keys [token]} :body-params :as req}]
-     (if (not= token verification-token)
-       (do
-         (timbre/info {:message "Received request with invalid Slack verification token"
-                       :token   token})
-         (-> {:message "Not Found"}
-             (response/bad-request)))
-       (handler req)))))
+  [handler]
+  (let [verification-token (config/config [:slack :verification-token])]
+    (fn [{{:keys [token]} :body-params :as req}]
+      (if (not= token verification-token)
+        (do
+          (timbre/info {:message "Received request with invalid Slack verification token"
+                        :token   token})
+          (-> {:message "Not Found"}
+              (response/bad-request)))
+        (handler req)))))
 
 (defn wrap-ignore-myself
-  "Ignore Slack Events from this app for all Slack events except `url_verification`
-  requests, which are sent in the same stream of events (and must therefore be
-  specially ignored here).
-
-  Processing messages from this application could potentially cause the app to
-  emit more messages, which could force the app into an endless loop."
+  "Ignore Slack Events from the app."
   [handler]
   (fn [{{{:keys [user]} :event type :type} :body-params
         app-user-id                        :slackbot.slack/app-user-id :as req}]

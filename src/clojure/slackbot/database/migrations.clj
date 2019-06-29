@@ -19,25 +19,15 @@
    [slackbot.config :as config]))
 
 (defn jdbc-config
-  ([]
-   (-> (config/config [:database :connection-string])
-       (jdbc-config)))
-  ([jdbc-url]
-   {:datastore  (ragtime.jdbc/sql-database {:connection-uri jdbc-url})
-    :migrations (ragtime.jdbc/load-resources "migrations")}))
+  []
+  (let [jdbc-url (config/config [:database :connection-string])]
+    {:datastore  (ragtime.jdbc/sql-database {:connection-uri jdbc-url})
+     :migrations (ragtime.jdbc/load-resources "migrations")}))
 
 (defn migrate
-  "Perform all pending migrations. Use the default JDBC connection URL
-  unless one is supplied."
-  ([]
-   (ragtime.repl/migrate (jdbc-config)))
-  ([jdbc-url]
-   (ragtime.repl/migrate (jdbc-config jdbc-url))))
+  []
+  (ragtime.repl/migrate (jdbc-config)))
 
 (defn rollback
-  "Perform any pending rollbacks. Use the default JDBC connection URL
-  unless one is supplied."
-  ([]
-   (ragtime.repl/rollback (jdbc-config)))
-  ([jdbc-url]
-   (ragtime.repl/rollback (jdbc-config jdbc-url))))
+  []
+  (ragtime.repl/rollback (jdbc-config)))

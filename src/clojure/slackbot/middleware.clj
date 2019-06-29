@@ -35,14 +35,14 @@
 
 (defn handle-format-exceptions
   "Handle Muuntaja formatting exceptions and return a response."
-  [^Exception e format request]
+  [^Exception e fmt request]
   (timbre/error {:message "Could not format request"
-                 :format  format
+                 :format  fmt
                  :error   (ex-message e)})
   {:status  400
    :headers {:content-type "application/json"}
    :body    {:error  "Error occurred attempting to format body to Content-Type"
-             :format format}})
+             :format fmt}})
 
 (defn url-encoder
   [_]

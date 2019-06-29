@@ -121,6 +121,3 @@
                            (interpose \newline)
                            (apply str))}
       (response/response)))
-
-
-

@@ -14,5 +14,5 @@ jobs:
             - ~/.m2
           key: slackbot-clj-v0-{{ checksum "project.clj" }}
       - run: |
-          lein do test, check, uberjar, bikeshed, eastwood
+          lein do cloverage --coveralls, check, uberjar, bikeshed, eastwood
           # lein nvd check

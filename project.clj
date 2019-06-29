@@ -1,47 +1,52 @@
 (defproject slackbot "0.1.0-SNAPSHOT"
   :description "Slack app and bot server"
   :url "https://github.com/chrisrink10/slackbot-clj"
-  :dependencies [[org.clojure/clojure "1.9.0"]
+  :dependencies [[org.clojure/clojure "1.10.1"]
                  [org.clojure/tools.cli "0.3.5"]
 
                  ;; Database dependencies
                  [funcool/clojure.jdbc "0.9.0"]
-                 [hikari-cp "2.5.0"]
+                 [hikari-cp "2.7.1"]
                  [com.layerware/hugsql "0.4.9"]
                  [com.layerware/hugsql-adapter-clojure-jdbc "0.4.9"]
-                 [ragtime "0.7.2"]
-                 [org.xerial/sqlite-jdbc "3.23.1"]
+                 [ragtime "0.8.0"]
+                 [org.xerial/sqlite-jdbc "3.28.0"]
 
                  ;; HTTP dependencies
                  [org.immutant/web "2.1.10"
                   :exclusions [ch.qos.logback/logback-classic]]
-                 [metosin/muuntaja "0.6.0-alpha1"
+                 [metosin/muuntaja "0.6.4"
                   :exclusions [com.fasterxml.jackson.core/jackson-core]]
-                 [metosin/reitit "0.1.3"
-                  :exclusions [com.fasterxml.jackson.core/jackson-core
-                               com.fasterxml.jackson.core/jackson-databind]]
-                 [ring/ring-core "1.7.0-RC1"]
-                 [ring/ring-codec "1.1.1"]
+                 [metosin/reitit "0.3.9"
+                  :exclusions [mvxcvi/arrangement
+                               mvxcvi/puget
+                               com.fasterxml.jackson.core/jackson-databind
+                               com.fasterxml.jackson.core/jackson-core]]
+                 [ring/ring-core "1.7.1"]
+                 [ring/ring-codec "1.1.2"]
 
                  ;; Slack Client
                  [funcool/httpurr "1.1.0"]
-                 [metosin/jsonista "0.2.1"]
+                 [metosin/jsonista "0.2.3"]
 
                  ;; Logging
                  [com.taoensso/timbre "4.10.0"]
-                 [com.fzakaria/slf4j-timbre "0.3.10"]
-                 [org.slf4j/log4j-over-slf4j "1.7.25"]
-                 [org.slf4j/jul-to-slf4j "1.7.25"]
-                 [org.slf4j/jcl-over-slf4j "1.7.25"]
+                 [com.fzakaria/slf4j-timbre "0.3.13"]
+                 [org.slf4j/log4j-over-slf4j "1.7.26"]
+                 [org.slf4j/jul-to-slf4j "1.7.26"]
+                 [org.slf4j/jcl-over-slf4j "1.7.26"]
 
                  ;; Utilities
                  [aleph "0.4.6"]
-                 [cprop "0.1.11"]
+                 [cprop "0.1.13"]
                  [crypto-random "1.2.0"]
-                 [expound "0.7.1"]
-                 [funcool/promesa "1.9.0"]
-                 [medley "1.0.0"]
-                 [mount "0.1.12"]]
+                 [expound "0.7.2"]
+                 [funcool/promesa "2.0.1"
+                  :exclusions [com.google.code.findbugs/jsr305
+                               com.google.errorprone/error_prone_annotations
+                               org.clojure/tools.reader]]
+                 [medley "1.2.0"]
+                 [mount "0.1.16"]]
 
   :profiles {:uberjar {:aot            [slackbot.core]
                        :resource-paths ["env/prod/resources"]}

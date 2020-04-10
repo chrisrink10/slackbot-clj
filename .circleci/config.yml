@@ -11,6 +11,8 @@ jobs:
       - run:
           name: install clj-kondo
           command: |
+            ls ~
+            ls ~/repo
             sudo chown -R circleci:circleci /usr/local/bin
             curl -sS https://raw.githubusercontent.com/borkdude/clj-kondo/master/script/install-clj-kondo | bash
       - run:

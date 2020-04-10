@@ -16,7 +16,6 @@
   (:require
    [hugsql.core :as hugsql]
    [hugsql.adapter.next-jdbc :as next-adapter]
-   [next.jdbc :as jdbc]
    [next.jdbc.connection :as jdbc.connection]
    [mount.core :refer [defstate]]
    [slackbot.config :as config])

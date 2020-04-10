@@ -62,13 +62,12 @@
                        :resource-paths ["env/dev/resources"]
                        :repl-options   {:init-ns slackbot-dev
                                         :init    (set! *print-length* 50)}}
-             :kaocha  {:dependencies   [[lambdaisland/kaocha "1.0-612"]]
+             :kaocha  {:dependencies   [[lambdaisland/kaocha "1.0-612"]
+                                        [lambdaisland/kaocha-cloverage "1.0-45"]]
                        :resource-paths ["env/test/resources"]}}
 
   :aliases {"lint"   ["with-profile" "+dev" "do" "eastwood," "kibit," "bikeshed,"]
             "kaocha" ["with-profile" "+kaocha" "run" "-m" "kaocha.runner"]}
-
-  :aliases {"lint" ["with-profile" "+dev" "do" "eastwood," "bikeshed"]}
 
   :source-paths ["src/clojure"]
   :resource-paths ["resources"]

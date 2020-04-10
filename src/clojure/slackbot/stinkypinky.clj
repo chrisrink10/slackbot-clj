@@ -38,7 +38,7 @@
 
 (defn reset-game
   "Reset a Stinky Pinky game to a new host."
-  [tx token workspace-id channel-id user-id]
+  [tx _ workspace-id channel-id user-id]
   (let [details {:workspace_id workspace-id
                  :channel_id   channel-id}]
     (db.stinkypinky/clear-guesses tx details)
@@ -192,13 +192,12 @@
   "Set the channel ID given as a stinky pinky channel."
   [tx token workspace-id channel-id user-id]
   (let [result (try
-                 (do
-                   (db.stinkypinky/add-stinky-pinky-channel tx
-                                                            {:workspace_id workspace-id
-                                                             :channel_id   channel-id
-                                                             :host         user-id})
-                   :successfully-set-channel)
-                 (catch SQLiteException e :channel-already-set))]
+                 (db.stinkypinky/add-stinky-pinky-channel tx
+                                                          {:workspace_id workspace-id
+                                                           :channel_id   channel-id
+                                                           :host         user-id})
+                 :successfully-set-channel
+                 (catch SQLiteException _ :channel-already-set))]
     (if (= :successfully-set-channel result)
       (slack/send-message token
                           {:channel channel-id
@@ -250,7 +249,7 @@
 
 (defn show-scores
   "Send the scores of the current game to the channel."
-  [tx token workspace-id channel-id user-id]
+  [tx token workspace-id channel-id _]
   (if-let [counts (db.stinkypinky/get-stinky-pinky-scores tx
                                                           {:workspace_id workspace-id
                                                            :channel_id   channel-id

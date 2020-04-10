@@ -17,8 +17,6 @@
    [clojure.spec.alpha :as s]
    [clojure.string :as str]
    [ring.util.response :as response]
-   [reitit.ring :as ring]
-   [taoensso.timbre :as timbre]
    [slackbot.slack :as slack]
    [slackbot.routes.slash-command.karma :as slash.karma]
    [slackbot.routes.slash-command.stinkypinky :as slash.stinkypinky]))
@@ -60,8 +58,8 @@
   (slash.stinkypinky/handle-stinky-pinky body-params tx token))
 
 (defmethod handle "/cooltext"
-  [{{:keys [team_id channel_id text]} :body-params
-    token                             :slackbot.slack/oauth-access-token}]
+  [{{:keys [channel_id text]} :body-params
+    token                     :slackbot.slack/oauth-access-token}]
   (let [cooltext (as-> text $
                    (str/replace $ #"\s" "")
                    (interpose \space $)
@@ -74,7 +72,7 @@
       (response/status 204)))
 
 (defmethod handle :default
-  [{{:keys [command] :as body} :body-params}]
+  [{{:keys [command]} :body-params}]
   (-> {:response_type "ephemeral"
        :text          (str "Unsupported slash command: `" command "`")}
       (response/bad-request)))

@@ -64,7 +64,7 @@
   "Create a new workspace record in the database and clean up the
   state generated to create it."
   [tx state {:keys [team_id access_token app_user_id]}]
-  (if-let [n (teams/new-workspace tx {:workspace_id       team_id
+  (if-let [_ (teams/new-workspace tx {:workspace_id       team_id
                                       :oauth_access_token access_token
                                       :app_user_id        app_user_id})]
     (do

@@ -14,10 +14,8 @@
 
 (ns slackbot.routes.slack-event
   (:require
-   [clojure.spec.alpha :as s]
    [ring.util.response :as response]
    [taoensso.timbre :as timbre]
-   [slackbot.config :as config]
    [slackbot.karma :as karma]))
 
 (defmulti handle-event-callback

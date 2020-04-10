@@ -16,7 +16,6 @@
   (:require
    [expound.alpha :as expound]
    [mount.core :refer [defstate]]
-   [reitit.core :as reitit]
    [reitit.ring :as ring]
    [reitit.ring.spec :as rrs]
    [reitit.spec :as rs]

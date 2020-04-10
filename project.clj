@@ -13,17 +13,16 @@
                  [org.xerial/sqlite-jdbc "3.30.1"]
 
                  ;; HTTP dependencies
-                 [org.immutant/web "2.1.10"
-                  :exclusions [ch.qos.logback/logback-classic]]
-                 [metosin/muuntaja "0.6.4"
+                 [ring/ring-core "1.8.0"]
+                 [ring/ring-jetty-adapter "1.8.0"]
+                 [ring/ring-codec "1.1.2"]
+                 [metosin/muuntaja "0.6.6"
                   :exclusions [com.fasterxml.jackson.core/jackson-core]]
-                 [metosin/reitit "0.3.9"
+                 [metosin/reitit "0.4.2"
                   :exclusions [mvxcvi/arrangement
                                mvxcvi/puget
                                com.fasterxml.jackson.core/jackson-databind
                                com.fasterxml.jackson.core/jackson-core]]
-                 [ring/ring-core "1.7.1"]
-                 [ring/ring-codec "1.1.2"]
 
                  ;; Slack Client
                  [funcool/httpurr "1.1.0"]
@@ -40,7 +39,7 @@
                  [aleph "0.4.6"]
                  [cprop "0.1.13"]
                  [crypto-random "1.2.0"]
-                 [expound "0.7.2"]
+                 [expound "0.8.4"]
                  [funcool/promesa "2.0.1"
                   :exclusions [com.google.code.findbugs/jsr305
                                com.google.errorprone/error_prone_annotations
@@ -54,7 +53,7 @@
                                         [org.clojure/tools.trace "0.7.9"]]
                        :plugins        [[jonase/eastwood "0.3.11"]
                                         [lein-bikeshed "0.5.2"]
-                                        [lein-nvd "1.1.1"]]
+                                        [lein-nvd "1.3.1"]]
                        :bikeshed       {:long-lines false}
                        :eastwood       {:config-files ["resources/eastwood_config.clj"]}
                        :source-paths   ["env/dev/src"]

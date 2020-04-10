@@ -14,12 +14,12 @@
 
 (ns slackbot.web-server
   (:require
-   [immutant.web :refer [run stop]]
    [mount.core :refer [defstate]]
+   [ring.adapter.jetty :refer [run-jetty]]
    [slackbot.config :as config]
    [slackbot.routes :refer [app]]))
 
 (defstate web-server
   :start (let [opts (config/config [:web-server])]
-           (run app opts))
-  :stop (stop web-server))
+           (run-jetty app (assoc opts :join? false)))
+  :stop (.stop web-server))

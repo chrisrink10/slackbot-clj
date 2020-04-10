@@ -37,8 +37,8 @@
 
 (s/def :slackbot.web-server/host string?)
 (s/def :slackbot.web-server/port (s/int-in 1 65535))
-(s/def :slackbot.web-server/web-server (s/keys :req-un [:slackbot.web-server/host
-                                                        :slackbot.web-server/port]))
+(s/def :slackbot.config/web-server (s/keys :req-un [:slackbot.web-server/host
+                                                    :slackbot.web-server/port]))
 
 (s/def :slackbot.config/slackbot (s/keys :req-un [:slackbot.config/database
                                                   :slackbot.config/logging

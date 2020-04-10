@@ -2,13 +2,13 @@ setup-dev:
 	@brew install borkdude/brew/clj-kondo
 
 
-.clj-condo:
+.clj-kondo:
 	@mkdir -p .clj-kondo
 	@-clj-kondo --lint "$(shell lein classpath)"
 
 
 .PHONY: lint
-lint: .clj-condo
+lint: .clj-kondo
 	@clj-kondo --lint src
 	@lein do check, lint
 

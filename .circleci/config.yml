@@ -16,14 +16,14 @@ jobs:
       - run:
           name: install dependencies
           command: lein deps
-      - save_cache:
-          paths:
-            - ~/.clj-kondo/.cache
-            - ~/.m2
-          key: slackbot-clj-v1-{{ checksum "project.clj" }}
       - run:
           name: run tests and lint
           command: |
             make lint test
             lein uberjar
             # lein nvd check
+      - save_cache:
+          paths:
+            - ~/repo/.clj-kondo/.cache
+            - ~/.m2
+          key: slackbot-clj-v1-{{ checksum "project.clj" }}

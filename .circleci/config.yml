@@ -7,7 +7,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: slackbot-clj-v0-{{ checksum "project.clj" }}
+          key: slackbot-clj-v1-{{ checksum "project.clj" }}
       - run:
           name: install clj-kondo
           command: |
@@ -19,8 +19,7 @@ jobs:
       - save_cache:
           paths:
             - ~/.m2
-            - /usr/local/bin/clj-kondo
-          key: slackbot-clj-v0-{{ checksum "project.clj" }}
+          key: slackbot-clj-v1-{{ checksum "project.clj" }}
       - run:
           name: run tests and lint
           command: |

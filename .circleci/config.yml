@@ -3,16 +3,27 @@ jobs:
   build:
     working_directory: ~/repo
     docker:
-      - image: circleci/clojure:openjdk-8-lein-2.9.1
+      - image: circleci/clojure:openjdk-11-lein-2.9.1-stretch
     steps:
       - checkout
       - restore_cache:
-          key: slackbot-clj-v0-{{ checksum "project.clj" }}
-      - run: lein deps
+          key: slackbot-clj-v1-{{ checksum "project.clj" }}
+      - run:
+          name: install clj-kondo
+          command: |
+            sudo chown -R circleci:circleci /usr/local/bin
+            curl -sS https://raw.githubusercontent.com/borkdude/clj-kondo/master/script/install-clj-kondo | bash
+      - run:
+          name: install dependencies
+          command: lein deps
+      - run:
+          name: run tests and lint
+          command: |
+            make lint test
+            lein uberjar
+            # lein nvd check
       - save_cache:
           paths:
+            - ~/repo/.clj-kondo/.cache
             - ~/.m2
-          key: slackbot-clj-v0-{{ checksum "project.clj" }}
-      - run: |
-          lein do test, check, uberjar, bikeshed, eastwood
-          # lein nvd check
+          key: slackbot-clj-v1-{{ checksum "project.clj" }}

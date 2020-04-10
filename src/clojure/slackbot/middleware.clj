@@ -15,14 +15,12 @@
 (ns slackbot.middleware
   (:import
    java.io.InputStream
-   java.io.InputStreamReader
    java.io.OutputStreamWriter
    java.io.OutputStream)
   (:require
    [clojure.pprint :as pprint]
    [clojure.walk :as walk]
    [jdbc.core :as jdbc]
-   [medley.core :refer [ex-message]]
    [muuntaja.core :as muuntaja]
    [muuntaja.format.core :as fmt]
    [muuntaja.middleware]
@@ -35,7 +33,7 @@
 
 (defn handle-format-exceptions
   "Handle Muuntaja formatting exceptions and return a response."
-  [^Exception e fmt request]
+  [^Exception e fmt _]
   (timbre/error {:message "Could not format request"
                  :format  fmt
                  :error   (ex-message e)})

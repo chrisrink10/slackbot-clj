@@ -103,14 +103,16 @@
 
 (defn wrap-supply-tx
   "Hydrate each request with a database transaction."
-  [handler]
-  (fn [req]
-    (jdbc/atomic-apply
-     db/conn
-     (fn [conn]
-       (->> conn
-            (assoc req :slackbot.database/tx)
-            (handler))))))
+  ([handler]
+   (wrap-supply-tx handler db/conn))
+  ([handler db-conn]
+   (fn [req]
+     (jdbc/atomic-apply
+      db-conn
+      (fn [conn]
+        (->> conn
+             (assoc req :slackbot.database/tx)
+             (handler)))))))
 
 (defn wrap-supply-slack-details
   "Pull the Slack Team ID from the request and fetch relevant team details

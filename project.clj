@@ -2,7 +2,7 @@
   :description "Slack app and bot server"
   :url "https://github.com/chrisrink10/slackbot-clj"
   :dependencies [[org.clojure/clojure "1.10.1"]
-                 [org.clojure/tools.cli "0.3.5"]
+                 [org.clojure/tools.cli "1.0.194"]
 
                  ;; Database dependencies
                  [funcool/clojure.jdbc "0.9.0"]
@@ -61,7 +61,12 @@
                        :source-paths   ["env/dev/src"]
                        :resource-paths ["env/dev/resources"]
                        :repl-options   {:init-ns slackbot-dev
-                                        :init    (set! *print-length* 50)}}}
+                                        :init    (set! *print-length* 50)}}
+             :kaocha  {:dependencies   [[lambdaisland/kaocha "1.0-612"]]
+                       :resource-paths ["env/test/resources"]}}
+
+  :aliases {"lint"   ["with-profile" "+dev" "do" "eastwood," "kibit," "bikeshed,"]
+            "kaocha" ["with-profile" "+kaocha" "run" "-m" "kaocha.runner"]}
 
   :aliases {"lint" ["with-profile" "+dev" "do" "eastwood," "bikeshed"]}
 

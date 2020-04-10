@@ -16,8 +16,9 @@
   (:require
    [clojure.test :refer [deftest is use-fixtures testing]]
    [ring.util.response :as response]
+   [slackbot.database.teams :as db.teams]
    [slackbot.middleware :as mw]
-   [slackbot.test-helpers :refer [wrap-refresh-db]]))
+   [slackbot.test-helpers :refer [wrap-refresh-db with-temp-db]]))
 
 (use-fixtures :once wrap-refresh-db)
 
@@ -46,7 +47,31 @@
     (is (contains? (handler {}) :slackbot.database/tx))))
 
 (deftest wrap-supply-slack-details
-  )
+  (with-temp-db *db*
+    (let [{:keys [workspace_id oauth_access_token app_user_id] :as db-req}
+          {:workspace_id       "FDKHBBBDP832NDD"
+           :oauth_access_token "xoxb-BLDKHLDHFENDKJDF"
+           :app_user_id        "NNDKHP32352NDB"}
+
+          other-workspace-id "NNBEJDKH3872ND"]
+      (db.teams/new-workspace *db* db-req)
+
+      (testing "request from unregistered Slack team ID"
+        (let [handler (-> identity
+                          (mw/wrap-supply-tx *db*)
+                          (mw/wrap-supply-slack-details))]
+          (is (= (-> {:message "Invalid team" :team-id other-workspace-id}
+                     (response/bad-request))
+                 (handler {:body-params {:team_id other-workspace-id
+                                         :type    "event"}})))))
+
+      (testing "URL verification request"
+        (let [resp    (response/response {})
+              handler (-> (constantly resp)
+                          (mw/wrap-supply-tx *db*)
+                          (mw/wrap-supply-slack-details))]
+          (is (= resp (handler {:body-params {:team_id other-workspace-id
+                                              :type    "url_verification"}}))))))))
 
 (deftest wrap-verify-slack-token-test
   (let [bad-req-ret (-> {:message "Not Found"}

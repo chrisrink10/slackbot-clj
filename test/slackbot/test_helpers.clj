@@ -16,6 +16,7 @@
   (:import
    java.io.File)
   (:require
+   [jdbc.core :as jdbc]
    [mount.core :as mount]
    [slackbot.database :as db]
    [slackbot.database.migrations :as db.migrations]))
@@ -34,12 +35,20 @@
        (finally
          (.delete f#)))))
 
+(defmacro with-temp-db
+  [db-binding & body]
+  `(with-temp-file [filepath# "slackbot-test" ".db"]
+     (let [jdbc-url# (str "jdbc:sqlite:" filepath#)]
+       (with-open [~db-binding (jdbc/connection jdbc-url#)]
+         (db.migrations/migrate jdbc-url#)
+         ~@body))))
+
 (defn wrap-refresh-db
   "Fixture to reset and migrate a fresh database."
-  [run-test]
+  [run-tests]
   (with-temp-file [filepath "slackbot-test" ".db"]
     (let [jdbc-url (str "jdbc:sqlite:" filepath)]
       (mount/start-with {#'db/datasource-options {:jdbc-url jdbc-url}})
       (db.migrations/migrate jdbc-url)
-      (run-test)
+      (run-tests)
       (mount/stop))))

@@ -1,0 +1,4 @@
+{:slackbot {:logging    {:level :debug}
+            :slack      {:api-url "https://slack.com/api"}
+            :web-server {:host "localhost"
+                         :port "8080"}}}

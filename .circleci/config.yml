@@ -8,16 +8,22 @@ jobs:
       - checkout
       - restore_cache:
           key: slackbot-clj-v0-{{ checksum "project.clj" }}
-      - run: |
-          sudo chown -R circleci:circleci /usr/local/bin
-          curl -sS https://raw.githubusercontent.com/borkdude/clj-kondo/master/script/install-clj-kondo | bash
-      - run: lein deps
+      - run:
+          name: install clj-kondo
+          command: |
+            sudo chown -R circleci:circleci /usr/local/bin
+            curl -sS https://raw.githubusercontent.com/borkdude/clj-kondo/master/script/install-clj-kondo | bash
+      - run:
+          name: install dependencies
+          command: lein deps
       - save_cache:
           paths:
             - ~/.m2
             - /usr/local/bin/clj-kondo
           key: slackbot-clj-v0-{{ checksum "project.clj" }}
-      - run: |
-          make lint test
-          lein uberjar
-          # lein nvd check
+      - run:
+          name: run tests and lint
+          command: |
+            make lint test
+            lein uberjar
+            # lein nvd check

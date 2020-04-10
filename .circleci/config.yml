@@ -18,6 +18,7 @@ jobs:
           command: lein deps
       - save_cache:
           paths:
+            - ~/.clj-kondo/.cache
             - ~/.m2
           key: slackbot-clj-v1-{{ checksum "project.clj" }}
       - run:

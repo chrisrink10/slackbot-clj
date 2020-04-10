@@ -20,7 +20,7 @@
   (:require
    [clojure.pprint :as pprint]
    [clojure.walk :as walk]
-   [jdbc.core :as jdbc]
+   [next.jdbc :as jdbc]
    [muuntaja.core :as muuntaja]
    [muuntaja.format.core :as fmt]
    [muuntaja.middleware]
@@ -105,12 +105,10 @@
   "Hydrate each request with a database transaction."
   [handler]
   (fn [req]
-    (jdbc/atomic-apply
-     db/conn
-     (fn [conn]
-       (->> conn
-            (assoc req :slackbot.database/tx)
-            (handler))))))
+    (jdbc/with-transaction [tx db/datasource]
+      (->> tx
+           (assoc req :slackbot.database/tx)
+           (handler)))))
 
 (defn wrap-supply-slack-details
   "Pull the Slack Team ID from the request and fetch relevant team details

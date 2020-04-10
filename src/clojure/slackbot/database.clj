@@ -14,26 +14,20 @@
 
 (ns slackbot.database
   (:require
-   [hikari-cp.core :as hikari-cp]
    [hugsql.core :as hugsql]
-   [hugsql.adapter.clojure-jdbc :as cj-adapter]
-   [jdbc.core :as jdbc]
+   [hugsql.adapter.next-jdbc :as next-adapter]
+   [next.jdbc.connection :as jdbc.connection]
    [mount.core :refer [defstate]]
-   [slackbot.config :as config]))
-
-(defstate datasource-options
-  :start {:jdbc-url (config/config [:database :connection-string])})
-
-(defstate datasource
-  :start (hikari-cp/make-datasource datasource-options)
-  :stop  (hikari-cp/close-datasource datasource))
+   [slackbot.config :as config])
+  (:import
+   (com.zaxxer.hikari HikariDataSource)))
 
 (defstate db-spec
-  :start {:datasource datasource})
+  :start {:jdbcUrl (config/config [:database :connection-string])})
 
-(defstate conn
-  :start (jdbc/connection db-spec)
-  :stop  (.close conn))
+(defstate ^HikariDataSource datasource
+  :start (jdbc.connection/->pool HikariDataSource db-spec)
+  :stop  (.close datasource))
 
 (defstate hugsql-adapter
-  :start (hugsql/set-adapter! (cj-adapter/hugsql-adapter-clojure-jdbc)))
+  :start (hugsql/set-adapter! (next-adapter/hugsql-adapter-next-jdbc)))

@@ -52,8 +52,7 @@
                        :resource-paths ["env/prod/resources"]}
              :dev     {:dependencies   [[org.clojure/tools.namespace "0.2.11"]
                                         [org.clojure/tools.trace "0.7.9"]]
-                       :plugins        [[clj-kondo "2020.04.05"]
-                                        [jonase/eastwood "0.3.11"]
+                       :plugins        [[jonase/eastwood "0.3.11"]
                                         [lein-bikeshed "0.5.2"]
                                         [lein-nvd "1.1.1"]]
                        :bikeshed       {:long-lines false}
@@ -63,8 +62,7 @@
                        :repl-options   {:init-ns slackbot-dev
                                         :init    (set! *print-length* 50)}}}
 
-  :aliases {"clj-kondo" ["run" "-m" "clj-kondo.main"]
-            "lint"      ["with-profile" "+dev" "do" "eastwood," "bikeshed"]}
+  :aliases {"lint" ["with-profile" "+dev" "do" "eastwood," "bikeshed"]}
 
   :source-paths ["src/clojure"]
   :resource-paths ["resources"]

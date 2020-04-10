@@ -15,8 +15,9 @@
 (ns slackbot.database.karma
   (:require
    [hugsql.core :as hugsql]
-   [jdbc.core :as jdbc]
    [slackbot.database :as db]))
+
+(declare increment-karma decrement-karma set-karma target-karma)
 
 (hugsql/def-db-fns "slackbot/database/sql/karma.sql")
 

@@ -1,0 +1,3 @@
+{:linters
+ {:unused-namespace  {:exclude [slackbot.config slackbot.database]}
+  :unresolved-symbol {:exclude [(mount.core/defstate)]}}}

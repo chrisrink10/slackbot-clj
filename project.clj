@@ -5,12 +5,12 @@
                  [org.clojure/tools.cli "1.0.194"]
 
                  ;; Database dependencies
-                 [funcool/clojure.jdbc "0.9.0"]
-                 [hikari-cp "2.7.1"]
-                 [com.layerware/hugsql "0.4.9"]
-                 [com.layerware/hugsql-adapter-clojure-jdbc "0.4.9"]
+                 [seancorfield/next.jdbc "1.0.409"]
+                 [com.zaxxer/HikariCP "3.4.2"]
+                 [com.layerware/hugsql "0.5.1"]
+                 [com.layerware/hugsql-adapter-next-jdbc "0.5.1"]
                  [ragtime "0.8.0"]
-                 [org.xerial/sqlite-jdbc "3.28.0"]
+                 [org.xerial/sqlite-jdbc "3.30.1"]
 
                  ;; HTTP dependencies
                  [org.immutant/web "2.1.10"

@@ -9,9 +9,8 @@ jobs:
       - restore_cache:
           key: slackbot-clj-v0-{{ checksum "project.clj" }}
       - run: |
-          curl -sSO https://raw.githubusercontent.com/borkdude/clj-kondo/master/script/install-clj-kondo
-          chmod +x install-clj-kondo
-          ./install-clj-kondo --download-dir .
+          chown circleci:circleci /usr/local/bin
+          curl -sS https://raw.githubusercontent.com/borkdude/clj-kondo/master/script/install-clj-kondo | bash
       - run: lein deps
       - save_cache:
           paths:

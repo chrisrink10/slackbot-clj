@@ -19,6 +19,7 @@
    [mount.core :as mount :refer [defstate]]
    [slackbot.database]
    [slackbot.database.migrations :as migrations]
+   [slackbot.proxy]
    [slackbot.logging]
    [slackbot.web-server]))
 

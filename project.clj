@@ -2,7 +2,7 @@
   :description "Slack app and bot server"
   :url "https://github.com/chrisrink10/slackbot-clj"
   :dependencies [[org.clojure/clojure "1.10.1"]
-                 [org.clojure/tools.cli "0.3.5"]
+                 [org.clojure/tools.cli "1.0.194"]
 
                  ;; Database dependencies
                  [seancorfield/next.jdbc "1.0.409"]
@@ -54,15 +54,20 @@
                                         [org.clojure/tools.trace "0.7.9"]]
                        :plugins        [[jonase/eastwood "0.3.11"]
                                         [lein-bikeshed "0.5.2"]
+                                        [lein-cloverage "1.1.1"]
                                         [lein-nvd "1.1.1"]]
                        :bikeshed       {:long-lines false}
                        :eastwood       {:config-files ["resources/eastwood_config.clj"]}
                        :source-paths   ["env/dev/src"]
                        :resource-paths ["env/dev/resources"]
                        :repl-options   {:init-ns slackbot-dev
-                                        :init    (set! *print-length* 50)}}}
+                                        :init    (set! *print-length* 50)}}
+             :kaocha  {:dependencies   [[lambdaisland/kaocha "1.0-612"]
+                                        [lambdaisland/kaocha-cloverage "1.0-45"]]
+                       :resource-paths ["env/test/resources"]}}
 
-  :aliases {"lint" ["with-profile" "+dev" "do" "eastwood," "bikeshed"]}
+  :aliases {"lint"   ["with-profile" "+dev" "do" "eastwood," "kibit," "bikeshed,"]
+            "kaocha" ["with-profile" "+kaocha" "run" "-m" "kaocha.runner"]}
 
   :source-paths ["src/clojure"]
   :resource-paths ["resources"]

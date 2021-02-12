@@ -15,4 +15,4 @@ lint: .clj-kondo
 
 .PHONY: test
 test:
-	@lein test
+	@lein cloverage --coveralls
